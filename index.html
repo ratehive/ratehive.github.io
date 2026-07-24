@@ -188,7 +188,7 @@
           <div><label for="niche">Niche</label>
             <select id="niche">
               <option value="1.00">Lifestyle / general</option>
-              <option value="1.15">Gaming</option>
+              <option value="1.00">Gaming</option>
               <option value="1.20">Food / cooking</option>
               <option value="1.35">Beauty / skincare</option>
               <option value="1.35">Fashion</option>
@@ -278,9 +278,19 @@
           the single biggest reason a generic calculator gives you a wrong number. Finance sits around 2.25x
           lifestyle, tech reviews 1.75x, beauty 1.35x, gaming 1.15x.</p>
 
-        <p><strong>There's a floor based on audience size</strong>, set at half the CPM applied to your follower
-          count, so a bad month for views doesn't tell you to work for nothing. Whichever of the two is higher
-          becomes the base.</p>
+        <p><strong>Views matter far more than follower count.</strong> This is the most consistent thing
+          creators and brand-side managers say, and most rate advice gets it wrong. One agency manager put it
+          plainly: a creator with 100k followers averaging 2k views will take $500, while one with 30k followers
+          averaging 40k views is worth considerably more. There's still a floor based on audience size, so a bad
+          month doesn't tell you to work for nothing, but it's capped at twice the view estimate. A large dormant
+          audience does not get quoted like a live one.</p>
+
+        <p><strong>It's checked against what creators actually report.</strong> Practitioners on r/PartneredYoutube
+          and r/InfluencerMarketing consistently name $15–30 CPM for general YouTube channels, $25–35 for a decent
+          niche, and $40–65 where the niche is genuinely valuable. One brand manager who has placed around $2m in
+          deals gave $30 CPM for on-camera commentary and $15–25 for Minecraft, Fortnite or Roblox content, which
+          many brands decline outright. Those figures line up with the published benchmarks, which is the main
+          reason to trust either.</p>
 
         <p><strong>Engagement is judged against your own platform and size</strong>, not a fixed number.
           4% is strong on Instagram and slightly below par on TikTok, and engagement reliably falls as accounts
@@ -298,6 +308,12 @@
           a lot. It can't know your track record, which matters as much as audience size once you have one. The
           niche figures are derived from YouTube data and extrapolated to other platforms, which is directionally
           right but still an extrapolation. And it takes your follower count on trust.</p>
+
+        <p><strong>One thing worth knowing before you reply to anyone.</strong> Creators repeatedly report that
+          cold inbound offers land at $150–200 regardless of what they're worth, and that brands fishing at that
+          level rarely move much. A creator with 9–12% engagement described being offered $150–200 for multiple
+          videos. If your number and their number are far apart, that is often a sign you're talking to the wrong
+          brand rather than that you're priced wrong.</p>
 
         <p class="hint">If you've done a deal that came out a long way from what this says, that's the useful
           information, not a bug. The numbers get revised when real ones contradict them.</p>
@@ -403,6 +419,12 @@ const CPM = {
 // Typical engagement rate (%) by platform and account size. Engagement means
 // different things per platform: 4% is strong on Instagram and below par on
 // TikTok, so the same input has to be judged against the right yardstick.
+// How much engagement is allowed to move the price, by platform. On YouTube the view
+// count already encodes how well a video performed, and practitioners there price almost
+// purely on views times CPM, so engagement barely moves it. On Instagram and TikTok,
+// where a follower count can be inert, engagement carries much more information.
+const ENG_WEIGHT = {ig:1, tiktok:1, yt:0.4, ytshorts:0.6, x:1};
+
 const ENG_BASE = {
   ig:       {nano:4.5, micro:2.5, macro:1.2},
   tiktok:   {nano:6.5, micro:4.5, macro:3.0},
@@ -458,16 +480,20 @@ function calcRate(){
     let cpm = (CPM[p] && CPM[p][del]) ? CPM[p][del] : 0;
     if(!cpm){ cpm=15; note='Unusual platform and deliverable pairing, so this falls back to a blended benchmark.'; }
     const byViews = (views/1000) * cpm * niche;
-    // Audience-size floor, so a creator whose views are temporarily down isn't
-    // told to charge nothing. Half CPM, because followers convert to views at
-    // well under 100%.
-    const byFollowers = (followers/1000) * cpm * 0.5 * niche;
+    let byFollowers = (followers/1000) * cpm * 0.5 * niche;
+    // Sponsors buy views, not followers. Creators and brand-side managers say this
+    // consistently, and a channel with a big dormant audience gets offered close to
+    // its view count, not its sub count. So the audience-size figure is capped at
+    // twice the view estimate: it still cushions a bad month, but it can't quote a
+    // 330k-follower account with 8k views as if it were worth $3,000.
+    if(views > 0) byFollowers = Math.min(byFollowers, byViews * 2);
     base = Math.max(byViews, byFollowers);
   }
 
   const engBase = (ENG_BASE[p] || ENG_BASE.ig)[tier];
   const engRatio = eng > 0 ? eng/engBase : 1;
-  const engMult = clamp(0.55 + 0.45*engRatio, 0.8, 1.45);
+  const engRaw = clamp(0.55 + 0.45*engRatio, 0.8, 1.45);
+  const engMult = 1 + (engRaw - 1) * (ENG_WEIGHT[p] ?? 1);
 
   // Niche lifts the floor too, but at half strength: a B2B nano creator is worth more
   // than a lifestyle one, just not by the full multiplier at this end of the market.
