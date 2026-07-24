@@ -1,0 +1,6 @@
+.playwright-mcp/
+.DS_Store
+
+# Commercial material lives in the private ratehive-ops repo.
+outreach/
+DESIGN-NOTES.md

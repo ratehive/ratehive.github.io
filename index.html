@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ratehive · what to charge for a brand deal</title>
+<meta name="description" content="A free rate calculator, deal tracker and rate card generator for creators working with brands. No account, no uploads, everything stays in your browser.">
+
+<!-- Social preview. Absolute URLs are required here; relative paths are ignored by
+     Facebook/LinkedIn/Discord crawlers. Update if the domain ever changes. -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ratehive.github.io/">
+<meta property="og:title" content="Ratehive · what to charge for a brand deal">
+<meta property="og:description" content="Free rate calculator, deal tracker and rate card generator for creators. No account. Everything stays in your browser.">
+<meta property="og:image" content="https://ratehive.github.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ratehive · what to charge for a brand deal">
+<meta name="twitter:description" content="Free rate calculator, deal tracker and rate card generator for creators. No account.">
+<meta name="twitter:image" content="https://ratehive.github.io/og.png">
+
+<!-- Solid-fill mark for the favicon: the outline version used in the header fills in
+     and turns to mush below about 20px. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M36 20L28 33.86L12 33.86L4 20L12 6.14L28 6.14Z' fill='%23e0a11b'/%3E%3Cg fill='%2314130f'%3E%3Crect x='13' y='22' width='3.6' height='6'/%3E%3Crect x='18.2' y='18' width='3.6' height='10'/%3E%3Crect x='23.4' y='14' width='3.6' height='14'/%3E%3C/g%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f6f3; --paper:#ffffff; --sunk:#f2f1ec; --line:#e3e1db;
+    --ink:#14130f; --ink-soft:#67635a; --ink-faint:#95908a;
+    --accent:#e0a11b; --accent-wash:#fdf4de; --accent-line:#eccf8a;
+    --pos:#1f7a4d; --neg:#b3271e;
+    --r:6px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#111110; --paper:#1a1a18; --sunk:#211f1c; --line:#2f2d29;
+      --ink:#f2f1ec; --ink-soft:#9c988e; --ink-faint:#6f6b63;
+      --accent:#e8ae2e; --accent-wash:#2a2110; --accent-line:#4a3a15;
+      --pos:#4bbf85; --neg:#e8695f;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;
+    font-size:15px}
+  .mono{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums}
+  a{color:inherit}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+
+  header{padding:38px 0 0}
+  .brand{display:flex;align-items:center;gap:9px}
+  .brand svg{display:block}
+  /* Set here rather than as a stroke="var(--accent)" presentation attribute, which
+     older Safari fails to resolve and renders as an invisible outline. */
+  .brand svg .cell{stroke:var(--accent)}
+  .brand-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.22rem;letter-spacing:-.025em}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:2.05rem;line-height:1.15;letter-spacing:-.025em;
+    margin:26px 0 12px;font-weight:700;max-width:21ch}
+  .sub{color:var(--ink-soft);margin:0;max-width:56ch}
+  .privacy{margin:16px 0 0;font-size:.83rem;color:var(--ink-faint)}
+
+  nav{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-top:34px}
+  .tab{padding:0 0 12px;border:none;background:none;color:var(--ink-faint);cursor:pointer;
+    font-size:.93rem;font-weight:500;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+
+  main{padding:28px 0 60px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:840px){.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:repeat(3,1fr)}}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+  .card h2{font-size:1rem;margin:0 0 3px;font-weight:600;letter-spacing:-.01em}
+  .card .lede{color:var(--ink-soft);font-size:.86rem;margin:0 0 16px}
+
+  label{display:block;font-size:.82rem;color:var(--ink-soft);margin:14px 0 5px;font-weight:500}
+  input,select{width:100%;padding:9px 11px;background:var(--paper);border:1px solid var(--line);
+    border-radius:5px;color:var(--ink);font-size:.92rem;font-family:inherit}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  .row{display:flex;gap:11px}.row>*{flex:1}
+
+  button.act{background:var(--ink);color:var(--paper);border:1px solid var(--ink);padding:10px 16px;
+    border-radius:5px;font-weight:600;cursor:pointer;font-size:.9rem;width:100%;margin-top:20px;font-family:inherit}
+  button.act:hover{opacity:.87}
+  button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  button.ghost:hover{background:var(--sunk);opacity:1}
+
+  .price{border:1px solid var(--accent-line);background:var(--accent-wash);border-radius:var(--r);padding:20px}
+  .price .n{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;letter-spacing:-.03em;
+    line-height:1;font-variant-numeric:tabular-nums}
+  .price .per{font-size:.8rem;color:var(--ink-soft);margin-top:5px}
+
+  /* Replaces a purely decorative gradient strip. This one actually plots where the
+     suggested number falls inside the negotiating range. */
+  .scale{margin-top:18px}
+  .scale-track{position:relative;height:3px;background:var(--accent-line);border-radius:2px}
+  .scale-mark{position:absolute;top:-3px;width:3px;height:9px;background:var(--ink);border-radius:1px;
+    transform:translateX(-1px)}
+  .scale-ends{display:flex;justify-content:space-between;margin-top:7px;font-size:.76rem;color:var(--ink-soft)}
+
+  .breakdown{margin-top:16px;font-size:.85rem}
+  .breakdown .line{display:flex;justify-content:space-between;padding:5px 0;color:var(--ink-soft)}
+  .breakdown .line span:last-child{font-family:'Space Grotesk',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+  .breakdown .final{border-top:1px solid var(--line);margin-top:5px;padding-top:9px;color:var(--ink);font-weight:600}
+  .note{font-size:.82rem;color:var(--ink-faint);margin-top:16px;line-height:1.55}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:.88rem}
+  th{color:var(--ink-faint);font-weight:500;font-size:.8rem}
+  tr:last-child td{border-bottom:none}
+  td .amt{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums}
+  .late{color:var(--neg)}
+
+  .tiles{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+  @media(min-width:640px){.tiles{grid-template-columns:repeat(4,1fr)}}
+  .tile{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:15px}
+  .tile .k{font-size:.78rem;color:var(--ink-soft)}
+  .tile .v{font-family:'Space Grotesk',sans-serif;font-size:1.35rem;font-weight:700;margin-top:4px;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .del{color:var(--ink-faint);cursor:pointer;border:none;background:none;font-size:.85rem;padding:4px 6px;
+    font-family:inherit}
+  .del:hover{color:var(--neg)}
+  select.mini{padding:5px 7px;font-size:.82rem;width:auto;border-radius:4px}
+  .empty{color:var(--ink-faint);padding:26px 0;font-size:.88rem}
+  .storage{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;
+    justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    font-size:.8rem;color:var(--ink-faint)}
+
+  .copybox{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.83rem;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:16px;
+    color:var(--ink);line-height:1.65}
+  footer{border-top:1px solid var(--line);padding:22px 0 50px;color:var(--ink-faint);font-size:.82rem}
+  footer p{margin:0;max-width:70ch;line-height:1.6}
+  .view{display:none}.view.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
+      <path class="cell" d="M36 20L28 33.86L12 33.86L4 20L12 6.14L28 6.14Z" fill="none" stroke-width="3.2" stroke-linejoin="round"/>
+      <g fill="currentColor"><rect x="13" y="22" width="3.6" height="6"/><rect x="18.2" y="18" width="3.6" height="10"/><rect x="23.4" y="14" width="3.6" height="14"/></g>
+    </svg>
+    <span class="brand-name">ratehive</span>
+  </div>
+  <h1>What should you charge for a brand deal?</h1>
+  <p class="sub">Ratehive works out a starting number from your reach, keeps track of the deals you have open, and builds a rate card you can send when a brand asks.</p>
+  <p class="privacy">Everything stays in your browser. No account, no uploads, no tracking.</p>
+
+  <nav>
+    <button class="tab active" data-view="calc">Rate calculator</button>
+    <button class="tab" data-view="tracker">Deal tracker</button>
+    <button class="tab" data-view="card">Rate card</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ RATE CALCULATOR ============ -->
+  <section class="view active" id="calc">
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Your numbers</h2>
+        <p class="lede">Fill these in and you'll get a starting price with the arithmetic shown.</p>
+        <label for="platform">Platform</label>
+        <select id="platform">
+          <option value="ig">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="yt">YouTube</option>
+          <option value="ytshorts">YouTube Shorts</option>
+          <option value="x">X / Twitter</option>
+        </select>
+        <div class="row">
+          <div><label for="followers">Followers</label><input id="followers" type="number" value="25000" min="0"></div>
+          <div><label for="views">Average views per post</label><input id="views" type="number" value="8000" min="0"></div>
+        </div>
+        <div class="row">
+          <div><label for="eng">Engagement rate (%)</label><input id="eng" type="number" value="4" min="0" step="0.1"></div>
+          <div><label for="deliverable">Deliverable</label>
+            <select id="deliverable">
+              <option value="story">Story frame</option>
+              <option value="post" selected>Feed post or photo</option>
+              <option value="reel">Reel or short video</option>
+              <option value="video">Dedicated video, 60s+</option>
+              <option value="integration">Long-form integration</option>
+              <option value="ugc">UGC, brand posts it not you</option>
+            </select>
+          </div>
+        </div>
+        <label for="usage">Usage rights (brand reuses your content in ads)</label>
+        <select id="usage">
+          <option value="1">None, organic post only</option>
+          <option value="1.35">Paid usage, 3 months</option>
+          <option value="1.6">Paid usage, 6 months</option>
+          <option value="2">Full or perpetual usage</option>
+        </select>
+        <label for="excl">Exclusivity (you can't work with competitors)</label>
+        <select id="excl">
+          <option value="1">None</option>
+          <option value="1.2">30 days</option>
+          <option value="1.4">90 days</option>
+        </select>
+        <button class="act" onclick="calcRate()">Calculate</button>
+      </div>
+
+      <div class="card">
+        <h2>Starting price</h2>
+        <p class="lede">What to open with.</p>
+        <div class="price">
+          <div class="n" id="rateMid">$0</div>
+          <div class="per">per deliverable</div>
+          <div class="scale">
+            <div class="scale-track"><div class="scale-mark" id="scaleMark" style="left:36%"></div></div>
+            <div class="scale-ends"><span id="rateLow">$0</span><span id="rateHigh">$0</span></div>
+          </div>
+        </div>
+        <div class="breakdown" id="breakdown"></div>
+        <p class="note">This takes whichever is higher, a per-view estimate or an audience-size floor, then adjusts
+          for the deliverable, usage rights and exclusivity. Rates vary a lot between niches, so check it against
+          anything you already know about what your audience is worth.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEAL TRACKER ============ -->
+  <section class="view" id="tracker">
+    <div class="tiles" id="tiles"></div>
+    <div class="card" style="margin-top:16px">
+      <h2>Add a deal</h2>
+      <p class="lede">Who you're talking to and what stage it's at.</p>
+      <div class="grid cols-3">
+        <div><label for="d_brand">Brand</label><input id="d_brand" placeholder="Acme Skincare"></div>
+        <div><label for="d_amount">Amount ($)</label><input id="d_amount" type="number" placeholder="1200" min="0"></div>
+        <div><label for="d_due">Due date</label><input id="d_due" type="date"></div>
+      </div>
+      <div class="grid cols-2">
+        <div><label for="d_status">Status</label>
+          <select id="d_status">
+            <option>Inquiry</option><option>Negotiating</option><option>Confirmed</option>
+            <option>Delivered</option><option>Invoiced</option><option>Paid</option>
+          </select>
+        </div>
+        <div><label for="d_notes">Deliverable and notes</label><input id="d_notes" placeholder="1 Reel plus 3 stories, 3mo usage"></div>
+      </div>
+      <button class="act" onclick="addDeal()">Add deal</button>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Pipeline</h2>
+      <div id="dealTable"></div>
+      <div class="storage">
+        <span>Saved in this browser, on this device.</span>
+        <button class="del" onclick="clearDeals()">Clear saved data</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RATE CARD ============ -->
+  <section class="view" id="card">
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Build a rate card</h2>
+        <p class="lede">For when a brand asks what your rates are.</p>
+        <label for="rc_name">Your name or handle</label><input id="rc_name" placeholder="@yourhandle">
+        <label for="rc_bio">One-line bio</label><input id="rc_bio" placeholder="Beauty and skincare, 25k on Instagram">
+        <label for="rc_email">Contact email</label><input id="rc_email" placeholder="you@email.com">
+        <label for="rc_i1">Line items, written as deliverable = price</label>
+        <input id="rc_i1" value="Feed post = $600">
+        <input id="rc_i2" value="Reel = $900" style="margin-top:7px">
+        <input id="rc_i3" value="Story set, 3 frames = $350" style="margin-top:7px">
+        <input id="rc_i4" value="UGC video, brand posts = $450" style="margin-top:7px">
+        <input id="rc_i5" value="Bundle: Reel + 3 stories = $1,100" style="margin-top:7px">
+        <button class="act" onclick="buildCard()">Generate</button>
+      </div>
+      <div class="card">
+        <h2>Your rate card</h2>
+        <p class="lede">Copy this into an email or a media kit.</p>
+        <div id="cardOut" class="copybox"></div>
+        <button class="act ghost" onclick="copyCard(this)">Copy</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Ratehive is free. No account, no uploads, no tracking. Your deals are saved in this browser on your own
+  device and are never sent to a server. The rate figures are benchmarks, and your niche may pay very differently.</p>
+</footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.view).classList.add('active');
+  };
+});
+
+const CPM = {
+  ig:{story:8, post:22, reel:28, video:30, integration:35, ugc:0},
+  tiktok:{story:0, post:18, reel:22, video:25, integration:28, ugc:0},
+  yt:{story:0, post:0, reel:20, video:0, integration:55, ugc:0},
+  ytshorts:{story:0, post:0, reel:18, video:20, integration:22, ugc:0},
+  x:{story:0, post:12, reel:15, video:16, integration:18, ugc:0}
+};
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+
+function calcRate(){
+  const p=document.getElementById('platform').value;
+  const followers=+document.getElementById('followers').value||0;
+  const views=+document.getElementById('views').value||0;
+  const eng=+document.getElementById('eng').value||0;
+  const del=document.getElementById('deliverable').value;
+  const usage=+document.getElementById('usage').value;
+  const excl=+document.getElementById('excl').value;
+
+  let base, note='';
+  if(del==='ugc'){
+    base = 250 + Math.min(followers,200000)*0.004;
+    note='UGC is priced on production value rather than reach.';
+  } else {
+    let cpm = (CPM[p] && CPM[p][del]) ? CPM[p][del] : 15;
+    if(cpm===0){cpm=15; note='Uncommon platform and deliverable combination, so this uses a blended benchmark.';}
+    const byViews = (views/1000)*cpm;
+    const byFollowers = (followers/1000)*cpm*0.5;
+    base = Math.max(byViews, byFollowers);
+  }
+  const engMult = Math.max(0.75, Math.min(1.5, 0.75 + (eng/3)*0.25));
+  let mid = Math.max(base * engMult * usage * excl, 75);
+  const low = mid*0.8, high = mid*1.35;
+
+  document.getElementById('rateMid').textContent = fmt(mid);
+  document.getElementById('rateLow').textContent = fmt(low);
+  document.getElementById('rateHigh').textContent = fmt(high);
+  document.getElementById('scaleMark').style.left = (((mid-low)/(high-low))*100).toFixed(1)+'%';
+
+  document.getElementById('breakdown').innerHTML =
+    (note?'<div class="line"><span>'+note+'</span><span></span></div>':'')+
+    '<div class="line"><span>Base, from reach</span><span>'+fmt(base)+'</span></div>'+
+    '<div class="line"><span>Engagement factor</span><span>'+engMult.toFixed(2)+'</span></div>'+
+    '<div class="line"><span>Usage rights</span><span>'+usage.toFixed(2)+'</span></div>'+
+    '<div class="line"><span>Exclusivity</span><span>'+excl.toFixed(2)+'</span></div>'+
+    '<div class="line final"><span>Suggested</span><span>'+fmt(mid)+'</span></div>';
+}
+calcRate();
+
+const STORE='ratehive.deals.v1';
+const SAMPLE=[{brand:'Northbrook Coffee', amount:1200, due:'', status:'Negotiating', notes:'Example row, delete it'}];
+
+// Persisted to localStorage so a refresh doesn't wipe someone's pipeline.
+// Device-only: nothing here is ever sent over the network.
+function loadDeals(){
+  try{
+    const raw=localStorage.getItem(STORE);
+    if(raw===null) return SAMPLE.slice();
+    const parsed=JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : SAMPLE.slice();
+  }catch(e){
+    return SAMPLE.slice();  // private mode or storage disabled, run in memory for this tab
+  }
+}
+function saveDeals(){ try{ localStorage.setItem(STORE, JSON.stringify(deals)); }catch(e){} }
+let deals=loadDeals();
+
+function clearDeals(){
+  if(!confirm('Delete every deal saved in this browser? This cannot be undone.')) return;
+  deals=[];
+  renderTable();
+}
+
+function isOverdue(d){
+  if(!d.due||d.status==='Paid') return false;
+  // A 'YYYY-MM-DD' string parses as UTC midnight, which lands on the previous day in
+  // every negative-offset timezone, so a deal due today read as overdue across the US.
+  const [y,m,day]=d.due.split('-').map(Number);
+  if(!y||!m||!day) return false;
+  const today=new Date(); today.setHours(0,0,0,0);
+  return new Date(y,m-1,day) < today;
+}
+
+function renderTiles(){
+  const sum=f=>deals.filter(f).reduce((a,d)=>a+ +d.amount,0);
+  const paid=sum(d=>d.status==='Paid');
+  const pipeline=sum(d=>d.status!=='Paid');
+  const confirmed=sum(d=>['Confirmed','Delivered','Invoiced'].includes(d.status));
+  const overdue=sum(isOverdue);
+  document.getElementById('tiles').innerHTML=`
+    <div class="tile"><div class="k">Paid</div><div class="v" style="color:${paid?'var(--pos)':'inherit'}">${fmt(paid)}</div></div>
+    <div class="tile"><div class="k">Confirmed, owed</div><div class="v">${fmt(confirmed)}</div></div>
+    <div class="tile"><div class="k">Open pipeline</div><div class="v">${fmt(pipeline)}</div></div>
+    <div class="tile"><div class="k">Overdue</div><div class="v" style="color:${overdue?'var(--neg)':'inherit'}">${fmt(overdue)}</div></div>`;
+}
+
+const STATUSES=['Inquiry','Negotiating','Confirmed','Delivered','Invoiced','Paid'];
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function renderTable(){
+  const t=document.getElementById('dealTable');
+  saveDeals();  // every mutation re-renders, so this is the single write point
+  if(!deals.length){t.innerHTML='<div class="empty">No deals yet.</div>';renderTiles();return;}
+  const rows=deals.map((d,i)=>`
+    <tr>
+      <td><strong>${escapeHtml(d.brand||'')}</strong>${d.notes?'<br><span style="color:var(--ink-faint)">'+escapeHtml(d.notes)+'</span>':''}</td>
+      <td class="amt">${fmt(+d.amount||0)}</td>
+      <td>${d.due ? (isOverdue(d)?'<span class="late">'+d.due+' (late)</span>':d.due) : '<span style="color:var(--ink-faint)">no date</span>'}</td>
+      <td><select class="mini" onchange="setStatus(${i},this.value)">
+        ${STATUSES.map(s=>`<option ${s===d.status?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td style="text-align:right"><button class="del" onclick="removeDeal(${i})">Remove</button></td>
+    </tr>`).join('');
+  t.innerHTML=`<table><thead><tr><th>Brand</th><th>Amount</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  renderTiles();
+}
+function addDeal(){
+  const brand=document.getElementById('d_brand').value.trim();
+  if(!brand){alert('Add a brand name.');return;}
+  deals.push({brand, amount:+document.getElementById('d_amount').value||0,
+    due:document.getElementById('d_due').value,
+    status:document.getElementById('d_status').value,
+    notes:document.getElementById('d_notes').value.trim()});
+  ['d_brand','d_amount','d_due','d_notes'].forEach(id=>document.getElementById(id).value='');
+  renderTable();
+}
+function setStatus(i,v){deals[i].status=v;renderTable();}
+function removeDeal(i){deals.splice(i,1);renderTable();}
+renderTable();
+
+function buildCard(){
+  const name=document.getElementById('rc_name').value||'Your name';
+  const bio=document.getElementById('rc_bio').value||'';
+  const email=document.getElementById('rc_email').value||'';
+  const items=['rc_i1','rc_i2','rc_i3','rc_i4','rc_i5'].map(id=>document.getElementById(id).value.trim()).filter(Boolean);
+  let out=`RATE CARD\n${name}\n`;
+  if(bio) out+=`${bio}\n`;
+  out+=`${'='.repeat(38)}\n\n`;
+  items.forEach(it=>{
+    const parts=it.split('=');
+    out+= parts.length===2 ? `${parts[0].trim().padEnd(28,' ')}${parts[1].trim()}\n` : `${it}\n`;
+  });
+  // Hard-wrapped short so the block survives being pasted into an email client
+  // without reflowing into ragged lines.
+  out+=`\nRates cover standard usage.\nExtended usage rights, exclusivity and rush\ntimelines are quoted separately.\n`;
+  if(email) out+=`\nBooking: ${email}`;
+  document.getElementById('cardOut').textContent=out;
+}
+// Takes the button explicitly. The implicit global `event` it used to read is
+// non-standard and undefined in Firefox, so the whole handler threw there.
+function copyCard(btn){
+  navigator.clipboard.writeText(document.getElementById('cardOut').textContent).then(()=>{
+    const o=btn.textContent;btn.textContent='Copied';setTimeout(()=>{btn.textContent=o;},1400);
+  }).catch(()=>alert('Copy failed, select the text manually.'));
+}
+buildCard();
+</script>
+</body>
+</html>
