@@ -182,6 +182,7 @@
               <option value="tiktok">TikTok</option>
               <option value="yt">YouTube</option>
               <option value="ytshorts">YouTube Shorts</option>
+              <option value="twitch">Twitch / live stream</option>
               <option value="x">X / Twitter</option>
             </select>
           </div>
@@ -203,20 +204,22 @@
         </div>
         <div class="row">
           <div><label for="followers">Followers</label><input id="followers" type="number" value="25000" min="0"></div>
-          <div><label for="views">Average views per post</label><input id="views" type="number" value="8000" min="0"></div>
+          <div><label for="views" id="viewsLabel">Average views per post</label><input id="views" type="number" value="8000" min="0"></div>
         </div>
         <div class="row">
-          <div><label for="eng">Engagement rate (%)</label><input id="eng" type="number" value="4" min="0" step="0.1"></div>
+          <div><label for="eng" id="engLabel">Engagement rate (%)</label><input id="eng" type="number" value="4" min="0" step="0.1"></div>
           <div><label for="deliverable">Deliverable</label>
-            <select id="deliverable">
-              <option value="story">Story frame</option>
-              <option value="post" selected>Feed post or photo</option>
-              <option value="reel">Reel or short video</option>
-              <option value="video">Dedicated video, 60s+</option>
-              <option value="integration">Long-form integration</option>
-              <option value="ugc">UGC, brand posts it not you</option>
-            </select>
+            <select id="deliverable"></select>
           </div>
+        </div>
+        <div id="durationRow">
+          <label for="duration">Ad spot length</label>
+          <select id="duration">
+            <option value="0.65">30 seconds, brief mention</option>
+            <option value="1" selected>60 seconds, the usual</option>
+            <option value="1.45">90 seconds</option>
+            <option value="2">2 minutes or more</option>
+          </select>
         </div>
         <label for="usage">Usage rights (brand reuses your content in ads)</label>
         <select id="usage">
@@ -276,7 +279,10 @@
         <p><strong>Niche moves that base more than anything else.</strong> Documented YouTube integration CPMs
           run $15–25 for lifestyle and $40–80 for B2B and developer tools. That's a threefold spread, and it's
           the single biggest reason a generic calculator gives you a wrong number. Finance sits around 2.25x
-          lifestyle, tech reviews 1.75x, beauty 1.35x, gaming 1.15x.</p>
+          lifestyle, tech reviews 1.75x and beauty 1.35x, while gaming is level with lifestyle. Gaming earns a
+          warning of its own: a brand manager who has placed around $2m in deals puts Minecraft, Fortnite and
+          Roblox content at $15&ndash;25 CPM and says many brands decline the category outright, whatever the
+          audience size.</p>
 
         <p><strong>Views matter far more than follower count.</strong> This is the most consistent thing
           creators and brand-side managers say, and most rate advice gets it wrong. One agency manager put it
@@ -300,6 +306,18 @@
         <p><strong>Usage rights, exclusivity and whitelisting are multipliers</strong>, in line with reported
           industry practice: usage adds 20–50% of base per month of use with perpetual rights running 100–300%,
           whitelisting around 30% a month, exclusivity 25–100% depending on how broadly it's drawn.</p>
+
+        <p><strong>Ad spot length matters more than people expect.</strong> Creators consistently price a
+          two-minute integration at roughly double a sixty-second one, and sixty seconds is the default nobody
+          states out loud. A thirty-second mention runs well below it. If a brand asks for "a quick mention" and
+          then sends a two-minute script, that is a different job at a different price.</p>
+
+        <p><strong>Live streaming is priced on a completely different basis.</strong> Not per view, but per
+          concurrent viewer per hour, because a sponsor is buying a block of live attention rather than a video
+          that accumulates views. Streamers report $0.50 to $1.00 per concurrent viewer per hour, so a stream
+          averaging 20 concurrents is worth roughly $10 to $20 an hour, and one reported figure was $300 for a
+          three-hour indie game sponsorship. Follower count matters even less here than elsewhere. Engagement
+          isn't counted separately either, because concurrent viewers already are the engagement measure.</p>
 
         <p><strong>UGC is handled separately.</strong> The market median is about $175 a video and it's priced on
           production and experience rather than audience, so follower count is capped hard and niche is damped.</p>
@@ -416,6 +434,64 @@ const CPM = {
   x:        {story:0,  post:10, reel:13, video:13, integration:14, ugc:0}
 };
 
+/* Live streaming is not priced per view. It's priced per concurrent viewer per hour,
+   because a sponsor is buying a block of a live audience's attention rather than a
+   video that accrues views over time. Reported figures cluster at $0.50-1.00 per
+   concurrent viewer per hour, so the baseline sits at $0.75 for a general audience. */
+const STREAM_RATE = 0.75;
+// Minimums are deliberately low here. Small streamers report real deals at $10-20 an
+// hour, so a floor set at video-deliverable levels would tell a 20-concurrent streamer
+// to ask several times the going rate and get nothing. These say "don't stream for
+// less than this" without inventing a market that doesn't exist.
+const STREAM_DELIVERABLES = {
+  stream1: {label:'Sponsored stream, 1 hour',  hours:1, mult:1,   min:25},
+  stream2: {label:'Sponsored stream, 2 hours', hours:2, mult:1,   min:40},
+  stream3: {label:'Sponsored stream, 3 hours', hours:3, mult:1,   min:60},
+  streamx: {label:'Stream plus social posts',  hours:3, mult:1.3, min:100}
+};
+
+const VIDEO_DELIVERABLES = {
+  story:       'Story frame',
+  post:        'Feed post or photo',
+  reel:        'Reel or short video',
+  video:       'Dedicated video, 60s+',
+  integration: 'Long-form integration',
+  ugc:         'UGC, brand posts it not you'
+};
+
+// Deliverables where an ad-spot length is a meaningful question. A story frame or a
+// static feed post doesn't have one.
+const TIMED = new Set(['reel','video','integration']);
+
+function isStream(p){ return p === 'twitch'; }
+
+// The deliverable list and a couple of field labels change with platform, because a
+// streamer's inputs are genuinely different numbers, not the same ones renamed.
+function syncPlatformUI(){
+  const p = document.getElementById('platform').value;
+  const del = document.getElementById('deliverable');
+  const streaming = isStream(p);
+  const wanted = streaming
+    ? Object.entries(STREAM_DELIVERABLES).map(([k,v]) => [k, v.label])
+    : Object.entries(VIDEO_DELIVERABLES);
+
+  const current = del.value;
+  if (del.dataset.mode !== (streaming ? 'stream' : 'video')) {
+    del.innerHTML = wanted.map(([k,l]) => `<option value="${k}">${l}</option>`).join('');
+    del.dataset.mode = streaming ? 'stream' : 'video';
+    if ([...del.options].some(o => o.value === current)) del.value = current;
+    else del.value = streaming ? 'stream2' : 'post';
+  }
+
+  document.getElementById('viewsLabel').textContent =
+    streaming ? 'Average concurrent viewers' : 'Average views per post';
+  document.getElementById('engLabel').textContent =
+    streaming ? 'Chat engagement (%), optional' : 'Engagement rate (%)';
+  // Length is baked into the stream deliverables, and meaningless for a static post.
+  document.getElementById('durationRow').style.display =
+    (!streaming && TIMED.has(del.value)) ? '' : 'none';
+}
+
 // Typical engagement rate (%) by platform and account size. Engagement means
 // different things per platform: 4% is strong on Instagram and below par on
 // TikTok, so the same input has to be judged against the right yardstick.
@@ -423,13 +499,16 @@ const CPM = {
 // count already encodes how well a video performed, and practitioners there price almost
 // purely on views times CPM, so engagement barely moves it. On Instagram and TikTok,
 // where a follower count can be inert, engagement carries much more information.
-const ENG_WEIGHT = {ig:1, tiktok:1, yt:0.4, ytshorts:0.6, x:1};
+// Streaming is 0: concurrent viewers already are the engagement measure, so counting
+// it twice would double-reward the same thing.
+const ENG_WEIGHT = {ig:1, tiktok:1, yt:0.4, ytshorts:0.6, twitch:0, x:1};
 
 const ENG_BASE = {
   ig:       {nano:4.5, micro:2.5, macro:1.2},
   tiktok:   {nano:6.5, micro:4.5, macro:3.0},
   yt:       {nano:4.0, micro:2.7, macro:1.8},
   ytshorts: {nano:5.0, micro:3.5, macro:2.2},
+  twitch:   {nano:5.0, micro:3.0, macro:2.0},
   x:        {nano:1.0, micro:0.6, macro:0.3}
 };
 
@@ -441,6 +520,9 @@ const BENCH = {
   tiktok:   {nano:'$150–400 a video',     micro:'$500–3,000 a video',   macro:'$3,000–20,000 a video'},
   yt:       {nano:'$200–600 a video',     micro:'$1,000–10,000 asking for a dedicated video, with integrations lower', macro:'$10,000–100,000 a dedicated video'},
   ytshorts: {nano:'$200–600 a short',     micro:'$500–3,000 a short',    macro:'$3,000–20,000 a short'},
+  twitch:   {nano:'streamers report $0.50–1.00 per concurrent viewer per hour, so roughly $10–20 an hour at 15–20 concurrents',
+             micro:'$0.50–1.00 per concurrent viewer per hour, though established streamers negotiate above it',
+             macro:'$0.50–1.00 per concurrent viewer per hour as a floor, with flat fees well above it at this size'},
   x:        {nano:'$50–300 a post',       micro:'$300–1,500 a post',     macro:'$1,500–10,000 a post'}
 };
 
@@ -467,10 +549,16 @@ function calcRate(){
   const excl=+document.getElementById('excl').value;
   const white=+document.getElementById('white').value;
 
+  const duration=+document.getElementById('duration').value || 1;
   const tier=tierOf(followers);
-  let base, note='', nicheApplied=niche;
+  let base, note='', nicheApplied=niche, durationUsed=1;
 
-  if(del==='ugc'){
+  if(isStream(p)){
+    const spec = STREAM_DELIVERABLES[del] || STREAM_DELIVERABLES.stream2;
+    // `views` holds average concurrent viewers here, per the relabelled field.
+    base = views * spec.hours * STREAM_RATE * spec.mult * niche;
+    note='Streams are priced per concurrent viewer per hour, so your follower count barely matters.';
+  } else if(del==='ugc'){
     // Priced on production and experience, so audience size is capped hard and
     // niche is damped: a brand buying footage cares less about who follows you.
     nicheApplied = 1 + (niche-1)*0.4;
@@ -488,6 +576,9 @@ function calcRate(){
     // 330k-follower account with 8k views as if it were worth $3,000.
     if(views > 0) byFollowers = Math.min(byFollowers, byViews * 2);
     base = Math.max(byViews, byFollowers);
+    // Creators consistently price a two-minute integration at about double a
+    // sixty-second one, so spot length is a real multiplier rather than a detail.
+    if(TIMED.has(del)){ durationUsed = duration; base *= duration; }
   }
 
   const engBase = (ENG_BASE[p] || ENG_BASE.ig)[tier];
@@ -497,7 +588,10 @@ function calcRate(){
 
   // Niche lifts the floor too, but at half strength: a B2B nano creator is worth more
   // than a lifestyle one, just not by the full multiplier at this end of the market.
-  const floor = (MIN_FEE[del] || 100) * (1 + (niche-1)*0.5);
+  const baseMin = isStream(p)
+    ? (STREAM_DELIVERABLES[del] || STREAM_DELIVERABLES.stream2).min
+    : (MIN_FEE[del] || 100);
+  const floor = baseMin * (1 + (niche-1)*0.5);
   const computed = base * engMult * usage * excl * white;
   const mid = Math.max(computed, floor);
   const low = mid*0.75, high = mid*1.5;
@@ -513,7 +607,10 @@ function calcRate(){
   rows.push('<div class="line"><span>Base, from reach</span><span>'+fmt(base)+'</span></div>');
   if(del!=='ugc' && niche!==1)
     rows.push('<div class="line"><span>Niche, already in the base</span><span>&times;'+niche.toFixed(2)+'</span></div>');
-  rows.push('<div class="line"><span>Engagement vs '+engBase+'% typical for your size</span><span>&times;'+engMult.toFixed(2)+'</span></div>');
+  if(durationUsed !== 1)
+    rows.push('<div class="line"><span>Ad spot length</span><span>&times;'+durationUsed.toFixed(2)+'</span></div>');
+  if(!isStream(p))
+    rows.push('<div class="line"><span>Engagement vs '+engBase+'% typical for your size</span><span>&times;'+engMult.toFixed(2)+'</span></div>');
   if(usage!==1) rows.push('<div class="line"><span>Usage rights</span><span>&times;'+usage.toFixed(2)+'</span></div>');
   if(excl!==1)  rows.push('<div class="line"><span>Exclusivity</span><span>&times;'+excl.toFixed(2)+'</span></div>');
   if(white!==1) rows.push('<div class="line"><span>Whitelisting</span><span>&times;'+white.toFixed(2)+'</span></div>');
@@ -522,20 +619,24 @@ function calcRate(){
   rows.push('<div class="line final"><span>Suggested</span><span>'+fmt(mid)+'</span></div>');
   document.getElementById('breakdown').innerHTML = rows.join('');
 
-  const tierWord = {nano:'Under 10k followers', micro:'10k to 100k followers', macro:'Over 100k followers'}[tier];
+  const tierWord = isStream(p)
+    ? {nano:'Under 10k followers', micro:'10k to 100k followers', macro:'Over 100k followers'}[tier] + ', streaming'
+    : {nano:'Under 10k followers', micro:'10k to 100k followers', macro:'Over 100k followers'}[tier];
   document.getElementById('bench').innerHTML =
     '<strong>'+tierWord+'.</strong> Published benchmarks for your platform and size: '+
     ((BENCH[p]||BENCH.ig)[tier])+'. If this calculator is a long way outside that, trust the benchmark.';
 }
+syncPlatformUI();
 calcRate();
 
 // Recalculate as inputs change. The button stays for anyone who expects one, but
 // watching the number move while you switch niche is what makes the model legible.
-['platform','niche','followers','views','eng','deliverable','usage','excl','white']
+['platform','niche','followers','views','eng','deliverable','usage','excl','white','duration']
   .forEach(id=>{
     const el=document.getElementById(id);
-    el.addEventListener('change', calcRate);
-    el.addEventListener('input', calcRate);
+    const handler=()=>{ syncPlatformUI(); calcRate(); };
+    el.addEventListener('change', handler);
+    el.addEventListener('input', handler);
   });
 
 const STORE='ratehive.deals.v1';
