@@ -535,6 +535,16 @@ const MIN_FEE = {story:50, post:100, reel:150, video:200, integration:200, ugc:7
 function fmt(n){return '$'+Math.round(n).toLocaleString();}
 function tierOf(f){ return f < 10000 ? 'nano' : (f < 100000 ? 'micro' : 'macro'); }
 function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+// A blank field and a typed 0 mean different things, and reading both as 0 quietly
+// priced a dead account like an average one. Blank means "I don't know", so the
+// calculator falls back to a neutral assumption and says on screen that it did.
+// A typed 0 is a real zero and gets priced as one.
+function numOrBlank(id){
+  const raw=document.getElementById(id).value.trim();
+  if(raw==='') return null;
+  const n=+raw;
+  return Number.isFinite(n) ? n : null;
+}
 
 function calcRate(){
   const p=document.getElementById('platform').value;
@@ -542,8 +552,10 @@ function calcRate(){
   // rather than zeroing the whole base out.
   const niche=+document.getElementById('niche').value || 1;
   const followers=+document.getElementById('followers').value||0;
-  const views=+document.getElementById('views').value||0;
-  const eng=+document.getElementById('eng').value||0;
+  const viewsGiven=numOrBlank('views');
+  const views=viewsGiven ?? 0;
+  const engGiven=numOrBlank('eng');
+  const eng=engGiven ?? 0;
   const del=document.getElementById('deliverable').value;
   const usage=+document.getElementById('usage').value;
   const excl=+document.getElementById('excl').value;
@@ -552,6 +564,7 @@ function calcRate(){
   const duration=+document.getElementById('duration').value || 1;
   const tier=tierOf(followers);
   let base, note='', nicheApplied=niche, durationUsed=1;
+  const caveats=[];
 
   if(isStream(p)){
     const spec = STREAM_DELIVERABLES[del] || STREAM_DELIVERABLES.stream2;
@@ -574,7 +587,8 @@ function calcRate(){
     // its view count, not its sub count. So the audience-size figure is capped at
     // twice the view estimate: it still cushions a bad month, but it can't quote a
     // 330k-follower account with 8k views as if it were worth $3,000.
-    if(views > 0) byFollowers = Math.min(byFollowers, byViews * 2);
+    if(viewsGiven !== null) byFollowers = Math.min(byFollowers, byViews * 2);
+    else caveats.push('No view figure, so this is priced on followers alone. Views move a rate far more than follower count, so add yours for a closer number.');
     base = Math.max(byViews, byFollowers);
     // Creators consistently price a two-minute integration at about double a
     // sixty-second one, so spot length is a real multiplier rather than a detail.
@@ -582,7 +596,9 @@ function calcRate(){
   }
 
   const engBase = (ENG_BASE[p] || ENG_BASE.ig)[tier];
-  const engRatio = eng > 0 ? eng/engBase : 1;
+  const engRatio = engGiven === null ? 1 : eng/engBase;
+  if(engGiven === null && !isStream(p))
+    caveats.push('No engagement rate, so this assumes you perform about average for your size.');
   const engRaw = clamp(0.55 + 0.45*engRatio, 0.8, 1.45);
   const engMult = 1 + (engRaw - 1) * (ENG_WEIGHT[p] ?? 1);
 
@@ -604,6 +620,7 @@ function calcRate(){
 
   const rows=[];
   if(note) rows.push('<div class="line"><span>'+note+'</span><span></span></div>');
+  caveats.forEach(c => rows.push('<div class="line"><span>'+c+'</span><span></span></div>'));
   rows.push('<div class="line"><span>Base, from reach</span><span>'+fmt(base)+'</span></div>');
   if(del!=='ugc' && niche!==1)
     rows.push('<div class="line"><span>Niche, already in the base</span><span>&times;'+niche.toFixed(2)+'</span></div>');
