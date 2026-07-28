@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ratehive · what to charge for a brand deal</title>
-<meta name="description" content="A free rate calculator, deal tracker and rate card generator for creators working with brands. No account, no uploads, everything stays in your browser.">
+<meta name="description" content="Free brand deal rate calculator for creators. Work out what to charge for a sponsored Instagram post, YouTube integration, TikTok video or Twitch stream, using real 2026 CPM benchmarks by niche. No account, nothing leaves your browser.">
+<link rel="canonical" href="https://ratehive.github.io/">
 
 <!-- Social preview. Absolute URLs are required here; relative paths are ignored by
      Facebook/LinkedIn/Discord crawlers. Update if the domain ever changes. -->
@@ -27,6 +28,70 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<!-- Structured data. The FAQ block mirrors the on-page questions verbatim, which is the
+     condition for it being eligible for a rich result rather than ignored. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "Ratehive",
+      "url": "https://ratehive.github.io/",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Any browser",
+      "description": "Free brand deal rate calculator, deal tracker and rate card generator for creators, built on published 2026 sponsorship benchmarks.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "featureList": [
+        "Brand deal rate calculator with per-niche CPM benchmarks",
+        "Deal pipeline tracker with payment and overdue tracking",
+        "Rate card generator"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much should I charge for a sponsored Instagram post?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Published rates for a 10,000 to 100,000 follower account run $500 to $5,000 for a feed post, but reported actual brand spend at that size averages $150 to $800. Reels go for roughly 1.5 to 3 times a static feed post. Below 10,000 followers, expect $100 to $500 a post and $50 to $200 for a story frame." }
+        },
+        {
+          "@type": "Question",
+          "name": "What CPM should I charge for a YouTube sponsorship?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Creators and brand-side buyers consistently name $15 to $30 per thousand views for a general channel, $25 to $35 for a decent niche, and $40 to $65 where the audience is genuinely valuable to advertisers. A two-minute spot is worth roughly double a 60 second one, and a dedicated video about 1.4 times an integration." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does my follower count or my view count matter more?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Views, by a wide margin. A creator with 100,000 followers averaging 2,000 views will take around $500, while one with 30,000 followers averaging 40,000 views is worth considerably more. A large dormant audience does not get paid like a live one." }
+        },
+        {
+          "@type": "Question",
+          "name": "How much extra should I charge for usage rights?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Reported practice is 20 to 50 percent of your base fee per month of use. Six months in one country typically adds 20 to 30 percent. Perpetual rights run 100 to 300 percent on top. Whitelisting, where ads run from your own handle, is a separate fee of around 30 percent a month." }
+        },
+        {
+          "@type": "Question",
+          "name": "How much do UGC creators charge?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The median is about $175 a video and the average sits between $150 and $212. Beginners charge $75 to $300, mid-tier $300 to $1,000, and experienced creators $600 to $3,000 or more. It is priced on production quality rather than audience size." }
+        },
+        {
+          "@type": "Question",
+          "name": "What should I charge for a sponsored Twitch stream?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Streaming is priced per concurrent viewer per hour rather than per view. Streamers report $0.50 to $1.00 per concurrent viewer per hour, so a stream averaging 20 concurrents is worth roughly $10 to $20 an hour." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does my niche change what I can charge?",
+          "acceptedAnswer": { "@type": "Answer", "text": "More than almost anything else. Documented YouTube sponsorship CPMs run $15 to $25 for lifestyle content and $40 to $80 for B2B and developer tools. Finance sits around 2.25 times lifestyle rates, tech reviews about 1.75 times, beauty 1.35 times. Many brands decline Minecraft, Fortnite and Roblox content outright." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
   :root{
     --bg:#f7f6f3; --paper:#ffffff; --sunk:#f2f1ec; --line:#e3e1db;
@@ -115,6 +180,8 @@
   .method strong{color:var(--ink);font-weight:600}
   .method .hint{font-size:.82rem;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:12px;
     margin-top:16px}
+  .method h3{font-size:.92rem;font-weight:600;margin:20px 0 6px;letter-spacing:-.01em;color:var(--ink)}
+  .method h3:first-child{margin-top:0}
 
   table{width:100%;border-collapse:collapse}
   th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:.88rem}
@@ -335,6 +402,65 @@
 
         <p class="hint">If you've done a deal that came out a long way from what this says, that's the useful
           information, not a bug. The numbers get revised when real ones contradict them.</p>
+      </div>
+    </div>
+
+    <div class="card" id="faq" style="margin-top:16px">
+      <h2>Questions people actually ask</h2>
+      <p class="lede">Short answers with the numbers attached.</p>
+      <div class="method">
+        <h3>How much should I charge for a sponsored Instagram post?</h3>
+        <p>Published rates for a 10,000 to 100,000 follower account run $500 to $5,000 for a feed post, but
+          reported actual brand spend at that size averages $150 to $800. Both figures are real: the first is
+          what creators ask, the second is what gets paid. Reels go for roughly 1.5 to 3 times a static feed
+          post. Below 10,000 followers, expect $100 to $500 a post and $50 to $200 for a story frame.</p>
+
+        <h3>What CPM should I charge for a YouTube sponsorship?</h3>
+        <p>Creators and brand-side buyers consistently name $15 to $30 per thousand views for a general channel,
+          $25 to $35 for a decent niche, and $40 to $65 where the audience is genuinely valuable to advertisers.
+          The usual shape is a 60 second integration, priced as your average views divided by 1,000 and multiplied
+          by that CPM. A two-minute spot is worth roughly double a 60 second one, and a dedicated video about 1.4
+          times an integration.</p>
+
+        <h3>Does my follower count or my view count matter more?</h3>
+        <p>Views, by a wide margin. This is the most common expensive mistake. One agency manager put it plainly:
+          a creator with 100,000 followers averaging 2,000 views will take $500, while one with 30,000 followers
+          averaging 40,000 views is worth considerably more. A large dormant audience does not get paid like a
+          live one, and quoting from your follower count is how you end up ignored.</p>
+
+        <h3>How much extra should I charge for usage rights?</h3>
+        <p>Reported practice is 20 to 50 percent of your base fee per month of use. Six months in one country
+          typically adds 20 to 30 percent. Perpetual rights, meaning the brand keeps the content forever, run
+          100 to 300 percent on top. Whitelisting, where they run ads from your own handle, is a separate fee of
+          around 30 percent a month. If a brand asks to use your content in ads after agreeing a fee, that is a
+          new deal rather than a favour.</p>
+
+        <h3>How much do UGC creators charge?</h3>
+        <p>The median is about $175 a video and the average sits between $150 and $212. Beginners charge $75 to
+          $300, mid-tier $300 to $1,000, and experienced creators $600 to $3,000 or more. It is priced on
+          production quality and experience rather than audience size, so follower count barely matters. Content
+          you also post on your own channels costs about 20 percent more than footage delivered for the brand to
+          use.</p>
+
+        <h3>What should I charge for a sponsored Twitch stream?</h3>
+        <p>Streaming is priced per concurrent viewer per hour rather than per view, because a sponsor is buying a
+          block of live attention. Streamers report $0.50 to $1.00 per concurrent viewer per hour, so a stream
+          averaging 20 concurrents is worth roughly $10 to $20 an hour. One reported figure was $300 for a
+          three-hour indie game sponsorship.</p>
+
+        <h3>A brand offered me $200. Is that a lowball?</h3>
+        <p>Probably, and more usefully it is often the wrong brand rather than the wrong price. Creators
+          repeatedly report cold inbound offers landing at $150 to $200 regardless of their actual reach, including
+          one with 9 to 12 percent engagement being offered that for multiple videos. Brands fishing at that level
+          rarely move far. If your number and their number are a long way apart, that is usually a sign about who
+          you are talking to.</p>
+
+        <h3>Does my niche change what I can charge?</h3>
+        <p>More than almost anything else, and most rate advice ignores it. Documented YouTube sponsorship CPMs
+          run $15 to $25 for lifestyle content and $40 to $80 for B2B and developer tools. Finance sits around
+          2.25 times lifestyle rates, tech reviews about 1.75 times, beauty 1.35 times. Gaming is level with
+          lifestyle, and Minecraft, Fortnite and Roblox content is worth a specific warning: many brands decline
+          the category outright whatever your audience size.</p>
       </div>
     </div>
   </section>
