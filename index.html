@@ -41,8 +41,12 @@
       "url": "https://ratehive.github.io/",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Any browser",
-      "description": "Free brand deal rate calculator, deal tracker and rate card generator for creators, built on published 2026 sponsorship benchmarks.",
+      "description": "Free brand deal rate calculator, deal tracker and rate card generator for creators, built on published 2026 sponsorship benchmarks cross-checked against creator-reported deals.",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "datePublished": "2026-07-24",
+      "dateModified": "2026-08-04",
+      "isAccessibleForFree": true,
+      "browserRequirements": "Requires JavaScript. No account needed.",
       "featureList": [
         "Brand deal rate calculator with per-niche CPM benchmarks",
         "Deal pipeline tracker with payment and overdue tracking",
@@ -182,6 +186,18 @@
     margin-top:16px}
   .method h3{font-size:.92rem;font-weight:600;margin:20px 0 6px;letter-spacing:-.01em;color:var(--ink)}
   .method h3:first-child{margin-top:0}
+  .stamp{font-size:.82rem;color:var(--ink-soft);margin:0 0 18px;padding:10px 12px;background:var(--sunk);
+    border-radius:5px;line-height:1.55;max-width:78ch}
+  .sources{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+  .sources h3{font-size:.95rem;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+  .sources h4{font-size:.8rem;font-weight:600;margin:18px 0 7px;color:var(--ink-soft);
+    text-transform:uppercase;letter-spacing:.06em}
+  .sources p{font-size:.85rem;color:var(--ink-soft);margin:0 0 8px;line-height:1.6;max-width:78ch}
+  .sources ul{margin:0;padding-left:18px}
+  .sources li{font-size:.85rem;color:var(--ink-soft);margin-bottom:4px;line-height:1.5}
+  .sources a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
+  .sources a:hover{color:var(--ink)}
+  .sources .hint{font-size:.82rem;color:var(--ink-faint);margin-top:14px}
 
   table{width:100%;border-collapse:collapse}
   th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:.88rem}
@@ -337,6 +353,9 @@
     <div class="card" id="method" style="margin-top:16px">
       <h2>Where these numbers come from</h2>
       <p class="lede">Because a rate calculator that won't show its working is just a number generator.</p>
+      <p class="stamp">Figures gathered 24 July 2026 from published benchmark data, then cross-checked against
+        deals creators and brand-side buyers report publicly. Full source list at the end. Rates move, so treat
+        anything here as checkable rather than settled.</p>
       <div class="method">
         <p><strong>The base is a CPM, a price per thousand views.</strong> Each platform and deliverable has a
           baseline rate for a general or lifestyle audience. YouTube long-form integration sits at $20, which is
@@ -402,6 +421,36 @@
 
         <p class="hint">If you've done a deal that came out a long way from what this says, that's the useful
           information, not a bug. The numbers get revised when real ones contradict them.</p>
+      </div>
+
+      <div class="sources">
+        <h3>Sources</h3>
+        <p>Two kinds, kept separate on purpose. The published benchmarks are aggregated <em>asking</em> rates.
+          The practitioner threads are what people say they were actually paid. Where the two disagree, the page
+          says so rather than averaging them.</p>
+
+        <h4>Published benchmark data</h4>
+        <ul>
+          <li><a href="https://sponsorradar.com/insights/youtube-sponsorship-rates-what-brands-should-pay" rel="nofollow noopener" target="_blank">SponsorRadar — YouTube sponsorship rates by niche</a></li>
+          <li><a href="https://outlierkit.com/resources/youtube-sponsorship-rates/" rel="nofollow noopener" target="_blank">OutlierKit — YouTube sponsorship rates</a></li>
+          <li><a href="https://influenceflow.io/resources/influencer-pricing-benchmarks-complete-2026-guide-to-creator-rates/" rel="nofollow noopener" target="_blank">InfluenceFlow — creator pricing benchmarks</a></li>
+          <li><a href="https://www.contentgrip.com/influencer-marketing-rate-card/" rel="nofollow noopener" target="_blank">ContentGrip — rate card by tier and platform</a></li>
+          <li><a href="https://nowadays.media/blog/influencer-engagement-rate-benchmarks-2026-by-platform-niche-follower-tier/" rel="nofollow noopener" target="_blank">Nowadays — engagement benchmarks by platform and tier</a></li>
+          <li><a href="https://www.socialinsider.io/social-media-benchmarks" rel="nofollow noopener" target="_blank">Socialinsider — social media benchmarks</a></li>
+          <li><a href="https://influee.co/blog/ugc-price" rel="nofollow noopener" target="_blank">Influee — UGC rates</a></li>
+          <li><a href="https://joinbrands.com/blog/ugc-creator-rates/" rel="nofollow noopener" target="_blank">JoinBrands — UGC creator rates</a></li>
+          <li><a href="https://www.modash.io/blog/influencer-pricing" rel="nofollow noopener" target="_blank">Modash — influencer pricing</a></li>
+          <li><a href="https://www.viralfusion.io/blog/influencer-usage-rights-in-2026-how-to-price-negotiate-and-avoid-costly-overuse" rel="nofollow noopener" target="_blank">ViralFusion — pricing usage rights</a></li>
+        </ul>
+
+        <h4>What creators and buyers report publicly</h4>
+        <p>Practitioner threads on r/PartneredYoutube and r/InfluencerMarketing, including a brand manager who
+          states they have placed around $2m in creator deals. These are what corrected the model twice: they
+          established that sponsors price on views rather than follower count, and that gaming content sits at
+          the bottom of the range whatever the audience size.</p>
+
+        <p class="hint">Every figure above is traceable. If one is wrong, it can be fixed, which is the point of
+          listing them.</p>
       </div>
     </div>
 
