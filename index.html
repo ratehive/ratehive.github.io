@@ -198,6 +198,13 @@
   .sources a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
   .sources a:hover{color:var(--ink)}
   .sources .hint{font-size:.82rem;color:var(--ink-faint);margin-top:14px}
+  .guidelinks{display:grid;gap:8px}
+  @media(min-width:700px){.guidelinks{grid-template-columns:1fr 1fr}}
+  .guidelinks a{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:5px;
+    text-decoration:none;background:var(--paper)}
+  .guidelinks a:hover{border-color:var(--accent)}
+  .guidelinks strong{display:block;font-size:.9rem;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+  .guidelinks span{display:block;font-size:.82rem;color:var(--ink-soft);margin-top:3px;line-height:1.45}
 
   table{width:100%;border-collapse:collapse}
   th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:.88rem}
@@ -451,6 +458,23 @@
 
         <p class="hint">Every figure above is traceable. If one is wrong, it can be fixed, which is the point of
           listing them.</p>
+      </div>
+    </div>
+
+    <div class="card" id="guides" style="margin-top:16px">
+      <h2>Rates by platform</h2>
+      <p class="lede">The same research, broken out per platform, with the figures that only apply there.</p>
+      <div class="guidelinks">
+        <a href="/youtube/"><strong>YouTube sponsorship rates by niche</strong>
+          <span>$15 to $80 CPM depending entirely on what your channel is about</span></a>
+        <a href="/instagram/"><strong>Instagram sponsored post rates</strong>
+          <span>By follower tier, and the gap between asking and getting</span></a>
+        <a href="/tiktok/"><strong>TikTok brand deal rates</strong>
+          <span>Tier rates, and why TikTok sits under Instagram</span></a>
+        <a href="/ugc/"><strong>UGC creator rates</strong>
+          <span>Median $175 a video, priced on production rather than reach</span></a>
+        <a href="/twitch/"><strong>Twitch sponsorship rates</strong>
+          <span>Per concurrent viewer per hour, a different basis entirely</span></a>
       </div>
     </div>
 
@@ -818,6 +842,27 @@ function calcRate(){
     '<strong>'+tierWord+'.</strong> Published benchmarks for your platform and size: '+
     ((BENCH[p]||BENCH.ig)[tier])+'. If this calculator is a long way outside that, trust the benchmark.';
 }
+// The per-platform guide pages link in with ?platform=yt etc, so someone arriving
+// from "youtube sponsorship rates" lands on a calculator already set to YouTube
+// rather than to Instagram. Anything unrecognised is ignored.
+(function applyUrlParams(){
+  const p = new URLSearchParams(location.search);
+  const platform = p.get('platform');
+  const niche = p.get('niche');
+  const el = id => document.getElementById(id);
+  if (platform && [...el('platform').options].some(o => o.value === platform)) {
+    el('platform').value = platform;
+    // Streaming swaps the deliverable list and relabels the view field, so the
+    // UI has to resync before any deliverable from the URL is applied.
+    syncPlatformUI();
+    const deliverable = p.get('deliverable');
+    if (deliverable && [...el('deliverable').options].some(o => o.value === deliverable)) {
+      el('deliverable').value = deliverable;
+    }
+  }
+  if (niche && [...el('niche').options].some(o => o.value === niche)) el('niche').value = niche;
+})();
+
 syncPlatformUI();
 calcRate();
 
